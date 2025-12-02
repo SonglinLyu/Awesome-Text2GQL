@@ -288,6 +288,9 @@ class IsoGqlQueryTranslator(QueryTranslator):
             return True
         else:
             return False
+    
+    def get_reserved_worlds(self) -> list:
+        return self.reserved_words
 
     def grammar_check(self, query: str) -> bool:
         error_listener = MyErrorListener()
