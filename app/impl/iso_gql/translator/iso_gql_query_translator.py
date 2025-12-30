@@ -282,12 +282,30 @@ class IsoGqlQueryTranslator(QueryTranslator):
             "UNIT",
             "VALUES",
         ]
+        self.mapping = {
+            "timestamp": "ts",
+            "date": "dt",
+            "limit": "limit_val",
+            "key": "key_val",
+            "order": "order_val",
+            "group": "group_val",
+            "source": "source_val",
+            "target": "target_val",
+            "user": "user_val",
+            "vid": "vid_val",  # 这里不会生效，因为 vid 已提前 return "vid"
+        }
 
     def is_reserved(self, word: str) -> bool:
         if word.upper() in self.reserved_words:
             return True
         else:
             return False
+    
+    def map_label_and_property(self, word: str) -> bool:
+        if word.lower() in self.mapping:
+            return self.mapping[word.lower()]
+        else:
+            return word
     
     def get_reserved_worlds(self) -> list:
         return self.reserved_words
@@ -338,6 +356,7 @@ class IsoGqlQueryTranslator(QueryTranslator):
     def _(self, node_pattern: NodePattern) -> str:
         node_pattern_str = ""
         # check reserved word
+        node_pattern.label = self.map_label_and_property(node_pattern.label)
         if self.is_reserved(node_pattern.label):
             node_pattern.label = f"`{node_pattern.label}`"
         # construct node string
@@ -352,6 +371,7 @@ class IsoGqlQueryTranslator(QueryTranslator):
             property_maps_str = ""
             for map in node_pattern.property_maps:
                 # check reserved word
+                map[0] = self.map_label_and_property(map[0])
                 if self.is_reserved(map[0]):
                     map[0] = f"`{map[0]}`"
                 property_maps_str += f"{map[0]}:{map[1]},"
@@ -365,6 +385,7 @@ class IsoGqlQueryTranslator(QueryTranslator):
     def _(self, edge_pattern: EdgePattern) -> str:
         edge_pattern_str = ""
         # check reserved word
+        edge_pattern.label = self.map_label_and_property(edge_pattern.label)
         if self.is_reserved(edge_pattern.label):
             edge_pattern.label = f"`{edge_pattern.label}`"
         # construct edge string
@@ -379,6 +400,7 @@ class IsoGqlQueryTranslator(QueryTranslator):
             property_maps_str = ""
             for map in edge_pattern.property_maps:
                 # check reserved word
+                map[0] = self.map_label_and_property(map[0])
                 if self.is_reserved(map[0]):
                     map[0] = f"`{map[0]}`"
                 property_maps_str += f"{map[0]}:{map[1]},"
@@ -442,6 +464,7 @@ class IsoGqlQueryTranslator(QueryTranslator):
         # check reserved word
         if self.is_reserved(return_item.alias):
             return_item.alias = f"`{return_item.alias}`"
+        return_item.property = self.map_label_and_property(return_item.property)
         if self.is_reserved(return_item.property):
             return_item.property = f"`{return_item.property}`"
         if self.is_reserved(return_item.symbolic_name):
@@ -463,6 +486,7 @@ class IsoGqlQueryTranslator(QueryTranslator):
         # check reserved word
         if self.is_reserved(sort_item.symbolic_name):
             sort_item.symbolic_name = f"`{sort_item.symbolic_name}`"
+        sort_item.property = self.map_label_and_property(sort_item.property)
         if self.is_reserved(sort_item.property):
             sort_item.property = f"`{sort_item.property}`"
         sort_item_str += f"{sort_item.symbolic_name}"
@@ -495,6 +519,7 @@ class IsoGqlQueryTranslator(QueryTranslator):
     def _(self, compare_expression: CompareExpression) -> str:
         compare_expression_str = ""
         # check reserved word
+        compare_expression.property = self.map_label_and_property(compare_expression.property)
         if self.is_reserved(compare_expression.property):
             compare_expression.property = f"`{compare_expression.property}`"
         compare_expression_str += f"{compare_expression.symbolic_name}"
