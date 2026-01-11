@@ -431,6 +431,14 @@ class IsoGqlQueryTranslator(QueryTranslator):
             with_str += "DISTINCT "
         with_str += f"{self.translate(with_clause.return_body)}"
         with_str += " NEXT"
+        if with_clause.compare_expression_list:
+            with_str += f" FILTER "
+            if isinstance(with_clause.compare_expression_list, list):
+                for compare_expression in with_clause.compare_expression_list:
+                    with_str += f"{self.translate(compare_expression)} AND "
+                with_str = with_str.rstrip("AND ")
+            else:
+                with_str += f"{self.translate(with_clause.compare_expression_list)}"
 
         return with_str
 
@@ -511,9 +519,14 @@ class IsoGqlQueryTranslator(QueryTranslator):
     @translate.register
     def _(self, where_clause: WhereClause) -> str:
         where_str = "WHERE "
-        where_str += f"{self.translate(where_clause.compare_expression)}"
+        if isinstance(where_clause.compare_expression_list, list):
+                for compare_expression in where_clause.compare_expression_list:
+                    where_str += f"{self.translate(compare_expression)} AND "
+                where_str = where_str.rstrip("AND ")
+        else:
+            where_str += f"{self.translate(where_clause.compare_expression_list)}"
 
-        return where_str
+        return where_str.rstrip("AND ")
 
     @translate.register
     def _(self, compare_expression: CompareExpression) -> str:

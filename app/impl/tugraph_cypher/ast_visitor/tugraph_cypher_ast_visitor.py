@@ -26,7 +26,7 @@ class TugraphCypherAstVisitor(LcypherVisitor, AstVisitor):
             return True, querry_pattern
         except Exception as e:
             print("发生未知错误:", e)
-            # traceback.print_exc()
+            traceback.print_exc()
             return False, []
 
     def visitOC_SinglePartQuery(self, ctx: LcypherParser.OC_SinglePartQueryContext):
@@ -268,6 +268,9 @@ class TugraphCypherAstVisitor(LcypherVisitor, AstVisitor):
             [symbolic_name, property, _] = self.visitOC_Expression(
                 ctx.oC_Atom().oC_FunctionInvocation().oC_Expression(0)
             )
+            # TODO: move this part into translation
+            if ctx.oC_Atom().oC_FunctionInvocation().DISTINCT():
+                symbolic_name = f"DISTINCT {symbolic_name}"
             return [symbolic_name, property, function_name]
         if ctx.oC_Atom().oC_Literal():
             # return comparison value
