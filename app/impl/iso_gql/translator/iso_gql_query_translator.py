@@ -337,7 +337,12 @@ class IsoGqlQueryTranslator(QueryTranslator):
     @translate.register
     def _(self, match_clause: MatchClause) -> str:
         match_str = "MATCH "
-        match_str += self.translate(match_clause.path_pattern)
+        if isinstance(match_clause.path_pattern, list):
+                for path_pattern in match_clause.path_pattern:
+                    match_str += f"{self.translate(path_pattern)}, "
+                match_str = match_str.rstrip(", ")
+        else:
+            match_str += self.translate(match_clause.path_pattern)
 
         return match_str
 
