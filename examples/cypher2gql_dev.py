@@ -16,7 +16,7 @@ from app.impl.tugraph_cypher.translator.tugraph_cypher_query_translator import (
 import re
 
 # print a cypher AST
-query_cypher = "CREATE (a {name: 'A'}), (b {name: 'B'}), (c {name: 'C'})"
+query_cypher = "MATCH (u:USER)-[:Approves]->(t:TRANSACTION) WITH u, COUNT(DISTINCT t) AS approved_transactions MATCH (u)-[:Approves]->(b:BUDGET) WITH u, approved_transactions, COUNT(DISTINCT b) AS approved_budgets MATCH (u)-[:Approves]->(r:REPORT) WITH u, approved_transactions, approved_budgets, COUNT(DISTINCT r) AS approved_reports WHERE approved_transactions >= 1 AND approved_budgets >= 1 AND approved_reports >= 1 RETURN u.user_id, u.role, u.department, approved_transactions + approved_budgets + approved_reports AS total_approved_items"
 
 input_stream_cypher = InputStream(query_cypher)
 lexer_cypher = LcypherLexer(input_stream_cypher)
