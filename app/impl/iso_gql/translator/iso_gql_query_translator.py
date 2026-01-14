@@ -283,16 +283,6 @@ class IsoGqlQueryTranslator(QueryTranslator):
             "VALUES",
         ]
         self.mapping = {
-            "timestamp": "ts",
-            "date": "dt",
-            "limit": "limit_val",
-            "key": "key_val",
-            "order": "order_val",
-            "group": "group_val",
-            "source": "source_val",
-            "target": "target_val",
-            "user": "user_val",
-            "vid": "vid_val",  # 这里不会生效，因为 vid 已提前 return "vid"
         }
 
     def is_reserved(self, word: str) -> bool:
